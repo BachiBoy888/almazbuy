@@ -3,10 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "next dev",
+    "build": "next build && next export",
+    "preview": "npx serve out"
   },
   "dependencies": {
     "lucide-react": "0.544.0",
@@ -25,6 +24,8 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   },
+  "engines": { "node": "20.x" },
+  "packageManager": "pnpm@9.12.3",
   "pnpm": {
     "overrides": {
       "@types/react": "19.0.10",
