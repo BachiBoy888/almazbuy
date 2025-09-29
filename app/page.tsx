@@ -56,7 +56,7 @@ const packages = [
     short: "Бизнес Fly Dubai, The Royal Atlantis, Mercedes G-Class",
     flight: "Fly Dubai (Business) + виза",
     hotel: "The Royal Atlantis",
-    hotelLink: "https://www.royalatlantis.com/",
+    hotelLink: "https://www.atlantis.com/atlantis-the-royal/",
     car: "Mercedes G-Class",
     imageHotel: "/hotels/royal atlantis.webp",
     imageCar: "/cars/gelik.webp",
