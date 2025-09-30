@@ -24,6 +24,14 @@ import {
  * - TailwindCSS + shadcn/ui + lucide-react
  */
 
+// ===== Meta Pixel helpers =====
+function track(name: string, params: Record<string, any> = {}) {
+  (window as any)?.fbq?.("trackCustom", name, params);
+}
+function trackStd(name: string, params: Record<string, any> = {}) {
+  (window as any)?.fbq?.("track", name, params);
+}
+
 const packages = [
   {
     id: 1,
@@ -56,7 +64,7 @@ const packages = [
     short: "Бизнес Fly Dubai, The Royal Atlantis, Mercedes G-Class",
     flight: "Fly Dubai (Business) + виза",
     hotel: "The Royal Atlantis",
-    hotelLink: "https://www.atlantis.com/atlantis-the-royal/",
+    hotelLink: "https://www.atlantis.com/atlantis-the-royal",
     car: "Mercedes G-Class",
     imageHotel: "/hotels/royal atlantis.webp",
     imageCar: "/cars/gelik.webp",
@@ -74,7 +82,6 @@ function makeWALink(p: {
   car: string;
 }) {
   const msg = ["Мне интересна", `Опция: ${p.title}`].join("\n");
-
   return `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(msg)}`;
 }
 
@@ -143,9 +150,15 @@ export default function LandingPage() {
             </a>
           </nav>
           <a
-            href="https://wa.me/971524581858?text=%D0%97%D0%B4%D1%80%D0%B0%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%F0%9F%91%8B%20%D0%9C%D0%B5%D0%BD%D1%8F%20%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%B5%D1%81%D1%83%D0%B5%D1%82%20%D0%B8%D0%BD%D0%B2%D0%B5%D1%81%D1%82%20%D1%82%D1%83%D1%80%20%D0%B2%20%D0%94%D1%83%D0%B1%D0%B0%D0%B5"
+            href={`https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(
+              "Здравствуйте! 👋 Интересует инвест-тур в Дубае"
+            )}`}
             target="_blank"
             rel="noreferrer"
+            onClick={() => {
+              track("WhatsAppClick", { location: "header" });
+              trackStd("Contact", { method: "WhatsApp", location: "header" });
+            }}
           >
             <Button className="rounded-2xl">Связаться</Button>
           </a>
@@ -154,14 +167,10 @@ export default function LandingPage() {
 
       {/* HERO (Page 1) */}
       <section className="relative overflow-hidden">
-        {/* BG image: mobile-first with <picture> */}
+        {/* BG image */}
         <picture>
-          {/* Desktop ≥1280px */}
           <source media="(min-width:1280px)" srcSet="/hero-desktop.webp" />
-          {/* Tablet ≥768px */}
           <source media="(min-width:1280px)" srcSet="/hero-desktop.webp" />
-          {/* Mobile default */}
-          {/* Mobile default */}
           <img
             src="/hero-mobile.webp"
             alt=""
@@ -172,10 +181,8 @@ export default function LandingPage() {
           />
         </picture>
 
-        {/* Тёмный оверлей для читаемости текста */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-zinc-900/90" />
 
-        {/* Твой контент Hero — оставь как есть */}
         <div className="relative max-w-7xl mx-auto px-4 py-20 md:py-28">
           <div className="max-w-3xl text-white">
             <Badge className="bg-white/10 border-white/30 text-white rounded-full mb-6">
@@ -210,12 +217,22 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="mt-10 flex gap-3">
-              <a href="#packages">
+              <a
+                href="#packages"
+                onClick={() =>
+                  track("CTA_Click", { id: "view_packages", section: "hero" })
+                }
+              >
                 <Button size="lg" className="rounded-2xl">
                   Выбрать опцию
                 </Button>
               </a>
-              <a href="#program">
+              <a
+                href="#program"
+                onClick={() =>
+                  track("CTA_Click", { id: "view_program", section: "hero" })
+                }
+              >
                 <Button size="lg" variant="white" className="rounded-2xl">
                   Смотреть программу
                 </Button>
@@ -273,6 +290,13 @@ export default function LandingPage() {
                     href={p.hotelLink}
                     target="_blank"
                     rel="noreferrer"
+                    onClick={() =>
+                      track("HotelLinkClick", {
+                        packageId: p.id,
+                        hotel: p.hotel,
+                        link: p.hotelLink,
+                      })
+                    }
                   >
                     <Hotel className="w-4 h-4" /> {p.hotel}
                   </a>
@@ -298,7 +322,29 @@ export default function LandingPage() {
                       ${priceFmt.format(p.price)}
                     </div>
                   </div>
-                  <a href={makeWALink(p)} target="_blank" rel="noreferrer">
+                  <a
+                    href={makeWALink(p)}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => {
+                      // контакт через WhatsApp по конкретному пакету
+                      track("WhatsAppClick", {
+                        location: "packages",
+                        packageId: p.id,
+                        packageTitle: p.title,
+                      });
+                      // стандартное событие Meta для контакта/инициации
+                      trackStd("Contact", {
+                        method: "WhatsApp",
+                        location: "packages",
+                        packageId: p.id,
+                        value: p.price,
+                        currency: "USD",
+                      });
+                      // Дополнительно можно считать как InitiateCheckout (по желанию):
+                      // trackStd("InitiateCheckout", { value: p.price, currency: "USD", packageId: p.id });
+                    }}
+                  >
                     <Button className="rounded-2xl">
                       Забронировать <ArrowRight className="ml-1 w-4 h-4" />
                     </Button>
@@ -459,7 +505,15 @@ export default function LandingPage() {
                 бюджет.
               </p>
             </div>
-            <a href="#contact">
+            <a
+              href="#contact"
+              onClick={() =>
+                track("CTA_Click", {
+                  id: "go_contact",
+                  section: "program_banner",
+                })
+              }
+            >
               <Button size="lg" variant="secondary" className="rounded-2xl">
                 Обсудить детали
               </Button>
@@ -481,9 +535,18 @@ export default function LandingPage() {
             </p>
             <div className="mt-6 flex gap-3">
               <a
-                href="https://wa.me/971524581858?text=%D0%97%D0%B4%D1%80%D0%B0%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%F0%9F%91%8B%20%D0%9A%D0%B0%D0%BA%D0%B8%D0%B5%20%D0%B1%D0%BB%D0%B8%D0%B6%D0%B0%D0%B9%D1%88%D0%B8%D0%B5%20%D0%B4%D0%B0%D1%82%D1%8B%20%D1%81%D0%B2%D0%BE%D0%B1%D0%BE%D0%B4%D0%BD%D1%8B%3F"
+                href={`https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(
+                  "Здравствуйте! 👋 Какие ближайшие даты свободны?"
+                )}`}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() => {
+                  track("WhatsAppClick", { location: "contact" });
+                  trackStd("Contact", {
+                    method: "WhatsApp",
+                    location: "contact",
+                  });
+                }}
               >
                 <Button className="rounded-2xl">Написать в WhatsApp</Button>
               </a>
@@ -527,10 +590,18 @@ export default function LandingPage() {
             Seafront Properties Invest Tour
           </div>
           <div className="flex items-center gap-4">
-            <a className="hover:underline" href="#">
+            <a
+              className="hover:underline"
+              href="#"
+              onClick={() => track("Footer_Click", { link: "policy" })}
+            >
               Политика
             </a>
-            <a className="hover:underline" href="#">
+            <a
+              className="hover:underline"
+              href="#"
+              onClick={() => track("Footer_Click", { link: "terms" })}
+            >
               Условия
             </a>
           </div>

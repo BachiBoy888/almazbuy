@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+// Подключаем компоненты для Meta Pixel
+import MetaPixel from "./components/MetaPixel";
+import TrackRouteChange from "./components/TrackRouteChange";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -80,6 +84,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* Подключение Meta Pixel */}
+        <MetaPixel />
+        <TrackRouteChange />
+
         {children}
       </body>
     </html>
