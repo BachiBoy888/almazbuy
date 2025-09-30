@@ -1,4 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
+
 import Script from "next/script";
 
 export default function MetaPixel() {
@@ -21,7 +23,7 @@ export default function MetaPixel() {
         `}
       </Script>
 
-      {/* NoScript fallback */}
+      {/* noscript fallback */}
       <noscript>
         <img
           height="1"
