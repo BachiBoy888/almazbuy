@@ -1,7 +1,8 @@
 // app/layout.tsx
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 
 // Подключаем компоненты для Meta Pixel
 import MetaPixel from "./components/MetaPixel";
@@ -16,6 +17,11 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+// ✅ В NEXT 15 themeColor переносим в viewport
+export const viewport: Viewport = {
+  themeColor: "#000000",
+};
 
 export const metadata: Metadata = {
   // Базовый адрес сайта (важно для абсолютных URL в метаданных)
@@ -69,9 +75,7 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-
-  // (опционально) цвет адресной строки на мобилках
-  themeColor: "#000000",
+  // ⛔ themeColor тут больше не задаём — он выше в viewport
 };
 
 export default function RootLayout({
@@ -86,7 +90,10 @@ export default function RootLayout({
       >
         {/* Подключение Meta Pixel */}
         <MetaPixel />
-        <TrackRouteChange />
+        {/* ✅ Оборачиваем useSearchParams-хук в Suspense, иначе Next 15 ругается */}
+        <Suspense fallback={null}>
+          <TrackRouteChange />
+        </Suspense>
 
         {children}
       </body>
