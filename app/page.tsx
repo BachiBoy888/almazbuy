@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
@@ -24,14 +25,32 @@ import {
  * - TailwindCSS + shadcn/ui + lucide-react
  */
 
-// ===== Meta Pixel helpers =====
-function track(name: string, params: Record<string, any> = {}) {
-  (window as any)?.fbq?.("trackCustom", name, params);
+/** ===== Meta Pixel helpers (typed, без any) ===== */
+type FbqParams = Record<string, unknown>;
+interface WindowWithFbq extends Window {
+  fbq?: (
+    method: "track" | "trackCustom" | "init" | "consent",
+    eventName?: string,
+    params?: FbqParams
+  ) => void;
 }
-function trackStd(name: string, params: Record<string, any> = {}) {
-  (window as any)?.fbq?.("track", name, params);
+function track(name: string, params: FbqParams = {}) {
+  (window as WindowWithFbq).fbq?.("trackCustom", name, params);
+}
+function trackStd(
+  name:
+    | "PageView"
+    | "Contact"
+    | "Lead"
+    | "Purchase"
+    | "InitiateCheckout"
+    | "CompleteRegistration",
+  params: FbqParams = {}
+) {
+  (window as WindowWithFbq).fbq?.("track", name, params);
 }
 
+/** ===== Данные пакетов ===== */
 const packages = [
   {
     id: 1,
@@ -41,8 +60,8 @@ const packages = [
     flight: "Fly Dubai (Economy) + виза",
     hotel: "Atlantis, The Palm",
     hotelLink: "https://www.atlantis.com/dubai/atlantis-the-palm",
-    car: "Cadillac (класс Premium)",
     imageHotel: "/hotels/AtlantisThePalmFrontal (1).webp",
+    car: "Cadillac (класс Premium)",
     imageCar: "/cars/cadilac.webp",
   },
   {
@@ -53,8 +72,8 @@ const packages = [
     flight: "Fly Dubai (Business) + виза",
     hotel: "Address Sky View",
     hotelLink: "https://addresshotels.com/en/hotels/address-sky-view/",
-    car: "BMW X7",
     imageHotel: "/hotels/Address sky view.webp",
+    car: "BMW X7",
     imageCar: "/cars/x7.webp",
   },
   {
@@ -65,11 +84,11 @@ const packages = [
     flight: "Fly Dubai (Business) + виза",
     hotel: "The Royal Atlantis",
     hotelLink: "https://www.atlantis.com/atlantis-the-royal",
-    car: "Mercedes G-Class",
     imageHotel: "/hotels/royal atlantis.webp",
+    car: "Mercedes G-Class",
     imageCar: "/cars/gelik.webp",
   },
-];
+] as const;
 
 const WHATSAPP_PHONE = "971524581858"; // без плюса, как в wa.me
 
@@ -87,6 +106,7 @@ function makeWALink(p: {
 
 const priceFmt = new Intl.NumberFormat("en-US");
 
+/** ===== Блок дня программы ===== */
 const DayBlock = ({
   day,
   title,
@@ -129,7 +149,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
-              src="/images/logo1.png" // путь к твоему лого
+              src="/images/logo1.png"
               alt="Логотип"
               className="w-10 h-10 rounded-xl object-contain"
             />
@@ -165,9 +185,8 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* HERO (Page 1) */}
+      {/* HERO */}
       <section className="relative overflow-hidden">
-        {/* BG image */}
         <picture>
           <source media="(min-width:1280px)" srcSet="/hero-desktop.webp" />
           <source media="(min-width:1280px)" srcSet="/hero-desktop.webp" />
@@ -242,7 +261,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* PACKAGES (Page 2) */}
+      {/* PACKAGES */}
       <section id="packages" className="max-w-7xl mx-auto px-4 py-16 md:py-24">
         <div className="flex items-end justify-between mb-10">
           <div>
@@ -327,13 +346,11 @@ export default function LandingPage() {
                     target="_blank"
                     rel="noreferrer"
                     onClick={() => {
-                      // контакт через WhatsApp по конкретному пакету
                       track("WhatsAppClick", {
                         location: "packages",
                         packageId: p.id,
                         packageTitle: p.title,
                       });
-                      // стандартное событие Meta для контакта/инициации
                       trackStd("Contact", {
                         method: "WhatsApp",
                         location: "packages",
@@ -341,7 +358,7 @@ export default function LandingPage() {
                         value: p.price,
                         currency: "USD",
                       });
-                      // Дополнительно можно считать как InitiateCheckout (по желанию):
+                      // При желании, можно добавить:
                       // trackStd("InitiateCheckout", { value: p.price, currency: "USD", packageId: p.id });
                     }}
                   >
@@ -356,7 +373,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* PROGRAM (Page 3) */}
+      {/* PROGRAM */}
       <section id="program" className="relative py-16 md:py-24">
         <div className="absolute inset-0 -z-10">
           <img
